@@ -7,16 +7,17 @@ import requests
 class PullRequest(typing.TypedDict):
     created_at: str
     closed_at: str
+    merged_at: str
     state: typing.Literal["open", "closed"]
 
 
-def get_closed_pull_requests(
+def get_merged_pull_requests(
     *,
-    limit: int | None,
+    at_least: int | None,
     owner: str,
     repo: str,
 ) -> list[PullRequest]:
-    """Get a list of all closed Pull Requests in the specified repo."""
+    """Get a list of all merged Pull Requests in the specified repo."""
     pull_requests = []
     headers = dict(
         Accept="application/vnd.github+json",
@@ -28,14 +29,14 @@ def get_closed_pull_requests(
         params=dict(per_page="100", state="closed"),
     )
     response.raise_for_status()
-    pull_requests.extend(response.json())
+    pull_requests.extend(pr for pr in response.json() if pr["merged_at"])
     while (
-        (limit is None or len(pull_requests) < limit)
+        (at_least is None or len(pull_requests) < at_least)
         and (next_page := _get_next_page(response.headers["Link"])) is not None
     ):
         response = requests.get(next_page, headers=headers)
         response.raise_for_status()
-        pull_requests.extend(response.json())
+        pull_requests.extend(pr for pr in response.json() if pr["merged_at"])
     return pull_requests
 
 

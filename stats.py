@@ -13,11 +13,7 @@ class Stats(typing.TypedDict):
 
 def describe(pull_requests: list[PullRequest]) -> Stats:
     lives = [_open_for(pr) for pr in pull_requests]
-    return dict(
-        mean=statistics.mean(lives),
-        median=statistics.median(lives),
-        mode=statistics.mode(lives),
-    )
+    return dict(mean=statistics.mean(lives), median=statistics.median(lives), mode=statistics.mode(lives))
 
 
 def _open_for(pull_request: PullRequest) -> int:

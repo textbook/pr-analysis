@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from core import get_closed_pull_requests
+from core import get_merged_pull_requests
 from stats import describe
 
 
@@ -10,16 +10,12 @@ def get_options(args: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--owner", help="Org or user", required=True, type=str)
     parser.add_argument("--repo", help="Repository", required=True, type=str)
-    parser.add_argument("--limit", default=None, help="Max PRs to fetch", type=int)
+    parser.add_argument("--at-least", default=None, help="Minimum PRs to fetch", type=int)
     return parser.parse_args(args)
 
 
 if __name__ == "__main__":
     options = get_options(sys.argv[1:])
-    pull_requests = get_closed_pull_requests(
-        limit=options.limit,
-        owner=options.owner,
-        repo=options.repo,
-    )
-    print(f"analysing {len(pull_requests):,} closed PRs")
+    pull_requests = get_merged_pull_requests(at_least=options.at_least, owner=options.owner, repo=options.repo)
+    print(f"analysing {len(pull_requests):,} merged PRs")
     print(describe(pull_requests))
