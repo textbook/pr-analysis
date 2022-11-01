@@ -20,6 +20,7 @@ def get_options(args: list[str]) -> argparse.Namespace:
     parser.add_argument("--limit", help="Number of PRs to analyse", type=int)
     parser.add_argument("--merged-before", help="Filter by merge date", type=_valid_date)
     parser.add_argument("--pretty", action="store_true", help="Human-readable JSON")
+    parser.add_argument("--quiet", action="store_true", help="Suppress printed outputs")
     return parser.parse_args(args)
 
 
@@ -51,9 +52,11 @@ def _write_json(pull_requests: list[EnrichedPullRequest], json_file: typing.Text
 if __name__ == "__main__":
     options = get_options(sys.argv[1:])
     pull_requests = get_merged_pull_requests(**vars(options))
-    print(f"analysing {len(pull_requests):,} merged PRs")
+    if not options.quiet:
+        print(f"analysing {len(pull_requests):,} merged PRs")
     if options.csv is not None:
         _write_csv(pull_requests, options.csv)
     if options.json is not None:
         _write_json(pull_requests, options.json, options.pretty)
-    print(describe(pull_requests))
+    if not options.quiet:
+        print(describe(pull_requests))

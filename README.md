@@ -22,6 +22,7 @@ Run `cli.py` and pass the appropriate arguments:
 $ ./cli.py --help
 usage: cli.py [-h] [--created-after CREATED_AFTER] [--csv CSV] [--json JSON]
               [--limit LIMIT] [--merged-before MERGED_BEFORE] [--pretty]
+              [--quiet]
               owner repo
 
 Perform statistical analysis on merged pull requests
@@ -40,6 +41,7 @@ options:
   --merged-before MERGED_BEFORE
                         Filter by merge date
   --pretty              Human-readable JSON
+  --quiet               Suppress printed outputs
 ```
 
 **Note** the CLI expects a valid [personal access token] (with the `repo` scope) as the `GITHUB_PAT` environment variable.
