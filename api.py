@@ -1,38 +1,68 @@
 import os
+import textwrap
 import typing
 
 import requests
 
 
 class PullRequest(typing.TypedDict):
+    closed_at: str
     created_at: str
     merged_at: str
 
 
 def closed_pull_requests(*, owner: str, repo: str) -> typing.Iterable[PullRequest]:
-    headers = dict(
-        Accept="application/vnd.github+json",
-        Authorization=f"Bearer {os.environ['GITHUB_PAT']}",
-    )
-    response = requests.get(
-        f"https://api.github.com/repos/{owner}/{repo}/pulls",
+    headers = dict(Authorization=f"Bearer {os.environ['GITHUB_PAT']}")
+    response = requests.post(
+        "https://api.github.com/graphql",
         headers=headers,
-        params=dict(per_page="100", state="closed"),
+        json=dict(query=_query(owner, repo)),
     )
     response.raise_for_status()
-    yield from response.json()
-    while (next_page := _get_next_page(response.headers["Link"])) is not None:
-        response = requests.get(next_page, headers=headers)
-        response.raise_for_status()
-        yield from response.json()
-
-
-def _get_next_page(header: str) -> str | None:
-    """Get the URL of the next page."""
-    links = {
-        rel[5:-1]: url[1:-1]
-        for url, rel in (
-            link.split("; ") for link in header.split(", ")
+    pull_requests = response.json()["data"]["repository"]["pullRequests"]
+    yield from map(_normalise_edge, pull_requests["edges"])
+    while pull_requests["pageInfo"]["hasNextPage"]:
+        response = requests.post(
+            "https://api.github.com/graphql",
+            headers=headers,
+            json=dict(query=_query(owner, repo, pull_requests["pageInfo"]["endCursor"])),
         )
-    }
-    return links.get("next")
+        response.raise_for_status()
+        pull_requests = pull_requests = response.json()["data"]["repository"]["pullRequests"]
+        yield from map(_normalise_edge, pull_requests["edges"])
+
+
+def _query(owner: str, repo: str, cursor: str = None) -> str:
+    return textwrap.dedent(f"""
+        query {{
+            repository(owner: "{owner}", name: "{repo}") {{
+                pullRequests(
+                    {"" if cursor is None else f'after: "{cursor}",'}
+                    first: 100,
+                    orderBy: {{field: CREATED_AT, direction: DESC}},
+                    states: [CLOSED, MERGED]
+                ) {{
+                    edges {{
+                        node {{
+                            closedAt
+                            createdAt
+                            id
+                            mergedAt
+                            number
+                        }}
+                    }}
+                    pageInfo {{
+                        endCursor
+                        hasNextPage
+                    }}
+                }}
+            }}
+        }}
+    """)
+
+
+KEY_MAP = dict(createdAt="created_at", closedAt="closed_at", mergedAt="merged_at")
+
+
+def _normalise_edge(edge: dict[str, dict[str, str]]) -> dict[str, str]:
+    return {KEY_MAP.get(key, key): value for key, value in edge["node"].items()}
