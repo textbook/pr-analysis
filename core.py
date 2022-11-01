@@ -11,14 +11,7 @@ class PullRequest(typing.TypedDict):
     state: typing.Literal["open", "closed"]
 
 
-def get_merged_pull_requests(
-    *,
-    at_least: int | None,
-    owner: str,
-    repo: str,
-) -> list[PullRequest]:
-    """Get a list of all merged Pull Requests in the specified repo."""
-    pull_requests = []
+def closed_pull_requests(*, owner: str, repo: str) -> typing.Iterable[PullRequest]:
     headers = dict(
         Accept="application/vnd.github+json",
         Authorization=f"Bearer {os.environ['GITHUB_PAT']}",
@@ -29,14 +22,26 @@ def get_merged_pull_requests(
         params=dict(per_page="100", state="closed"),
     )
     response.raise_for_status()
-    pull_requests.extend(pr for pr in response.json() if pr["merged_at"])
-    while (
-        (at_least is None or len(pull_requests) < at_least)
-        and (next_page := _get_next_page(response.headers["Link"])) is not None
-    ):
+    yield from response.json()
+    while (next_page := _get_next_page(response.headers["Link"])) is not None:
         response = requests.get(next_page, headers=headers)
         response.raise_for_status()
-        pull_requests.extend(pr for pr in response.json() if pr["merged_at"])
+        yield from response.json()
+
+
+def get_merged_pull_requests(
+    *,
+    at_least: int | None,
+    owner: str,
+    repo: str,
+) -> list[PullRequest]:
+    """Get a list of all merged Pull Requests in the specified repo."""
+    pull_requests = []
+    for pull_request in closed_pull_requests(owner=owner, repo=repo):
+        if pull_request["merged_at"] is not None:
+            pull_requests.append(pull_request)
+        if at_least is not None and len(pull_requests) == at_least:
+            break
     return pull_requests
 
 
