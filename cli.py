@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import csv
 import datetime
 import json
 import sys
@@ -13,7 +14,8 @@ def get_options(args: list[str]) -> argparse.Namespace:
     parser.add_argument("owner", help="Org or user", type=str)
     parser.add_argument("repo", help="Repository", type=str)
     parser.add_argument("--created-after", help="Filter by creation date", type=_valid_date)
-    parser.add_argument("--json", help="Save PR data to file", type=argparse.FileType("w"))
+    parser.add_argument("--csv", help="Save PR data to CSV file", type=argparse.FileType("w"))
+    parser.add_argument("--json", help="Save PR data to JSON file", type=argparse.FileType("w"))
     parser.add_argument("--limit", help="Number of PRs to analyse", type=int)
     parser.add_argument("--merged-before", help="Filter by merge date", type=_valid_date)
     parser.add_argument("--pretty", action="store_true", help="Human-readable JSON")
@@ -39,4 +41,8 @@ if __name__ == "__main__":
             indent=2 if options.pretty else None,
             separators=(",", ": ") if options.pretty else (",", ":"),
         )
+    if options.csv:
+        writer = csv.DictWriter(options.csv, fieldnames=list(pull_requests[0].keys()))
+        writer.writeheader()
+        writer.writerows(pull_requests)
     print(describe(pull_requests))
