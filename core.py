@@ -31,7 +31,7 @@ def closed_pull_requests(*, owner: str, repo: str) -> typing.Iterable[PullReques
 
 def get_merged_pull_requests(
     *,
-    at_least: int | None,
+    limit: int | None,
     owner: str,
     repo: str,
 ) -> list[PullRequest]:
@@ -40,7 +40,7 @@ def get_merged_pull_requests(
     for pull_request in closed_pull_requests(owner=owner, repo=repo):
         if pull_request["merged_at"] is not None:
             pull_requests.append(pull_request)
-        if at_least is not None and len(pull_requests) == at_least:
+        if limit is not None and len(pull_requests) == limit:
             break
     return pull_requests
 

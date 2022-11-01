@@ -10,7 +10,7 @@ def get_options(args: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--owner", help="Org or user", required=True, type=str)
     parser.add_argument("--repo", help="Repository", required=True, type=str)
-    parser.add_argument("--at-least", default=None, help="Minimum PRs to fetch", type=int)
+    parser.add_argument("--limit", default=None, help="Number of PRs to analyse", type=int)
     return parser.parse_args(args)
 
 
