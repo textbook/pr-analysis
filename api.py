@@ -13,7 +13,7 @@ class PullRequest(typing.TypedDict):
     number: int
 
 
-def closed_pull_requests(*, owner: str, repo: str) -> typing.Iterable[PullRequest]:
+def merged_pull_requests(*, owner: str, repo: str) -> typing.Iterable[PullRequest]:
     headers = dict(Authorization=f"Bearer {os.environ['GITHUB_PAT']}")
     response = requests.post(
         "https://api.github.com/graphql",
@@ -42,7 +42,7 @@ def _query(owner: str, repo: str, cursor: str = None) -> str:
                     {"" if cursor is None else f'after: "{cursor}",'}
                     first: 100,
                     orderBy: {{field: CREATED_AT, direction: DESC}},
-                    states: [CLOSED, MERGED]
+                    states: [MERGED]
                 ) {{
                     edges {{
                         node {{

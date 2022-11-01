@@ -1,6 +1,6 @@
 import datetime
 
-from api import closed_pull_requests, PullRequest
+from api import merged_pull_requests, PullRequest
 
 
 def get_merged_pull_requests(
@@ -12,15 +12,12 @@ def get_merged_pull_requests(
     repo: str,
     **_,
 ) -> list[PullRequest]:
-    """Get a list of all merged Pull Requests in the specified repo."""
+    """Get a list of relevant merged Pull Requests in the specified repo."""
     pull_requests = []
-    for pull_request in closed_pull_requests(owner=owner, repo=repo):
+    for pull_request in merged_pull_requests(owner=owner, repo=repo):
         if created_after is not None and pull_request["created_at"] < _isoformat(created_after):
             break
-        if (
-            (merged_at := pull_request["merged_at"]) is not None
-            and (merged_before is None or merged_at < _isoformat(merged_before))
-        ):
+        if merged_before is None or pull_request["merged_at"] < _isoformat(merged_before):
             pull_requests.append(pull_request)
         if limit is not None and len(pull_requests) == limit:
             break
