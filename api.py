@@ -30,7 +30,7 @@ def merged_pull_requests(*, owner: str, repo: str) -> typing.Iterable[PullReques
             json=dict(query=_query(owner, repo, pull_requests["pageInfo"]["endCursor"])),
         )
         response.raise_for_status()
-        pull_requests = pull_requests = response.json()["data"]["repository"]["pullRequests"]
+        pull_requests = response.json()["data"]["repository"]["pullRequests"]
         yield from map(_normalise_edge, pull_requests["edges"])
 
 
