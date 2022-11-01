@@ -8,7 +8,9 @@ import requests
 class PullRequest(typing.TypedDict):
     closed_at: str
     created_at: str
+    id: str
     merged_at: str
+    number: int
 
 
 def closed_pull_requests(*, owner: str, repo: str) -> typing.Iterable[PullRequest]:
