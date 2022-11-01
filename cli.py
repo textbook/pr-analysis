@@ -16,6 +16,6 @@ def get_options(args: list[str]) -> argparse.Namespace:
 
 if __name__ == "__main__":
     options = get_options(sys.argv[1:])
-    pull_requests = get_merged_pull_requests(at_least=options.at_least, owner=options.owner, repo=options.repo)
+    pull_requests = get_merged_pull_requests(**vars(options))
     print(f"analysing {len(pull_requests):,} merged PRs")
     print(describe(pull_requests))
