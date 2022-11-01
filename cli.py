@@ -4,8 +4,9 @@ import csv
 import datetime
 import json
 import sys
+import typing
 
-from core import get_merged_pull_requests
+from core import EnrichedPullRequest, get_merged_pull_requests
 from stats import describe
 
 
@@ -30,19 +31,29 @@ def _valid_date(value: str) -> datetime.datetime:
         raise argparse.ArgumentTypeError(msg)
 
 
+def _write_csv(pull_requests: list[EnrichedPullRequest], csv_file: typing.TextIO) -> None:
+    writer = csv.DictWriter(csv_file, fieldnames=list(pull_requests[0].keys()))
+    writer.writeheader()
+    writer.writerows(pull_requests)
+    csv_file.close()
+
+
+def _write_json(pull_requests: list[EnrichedPullRequest], json_file: typing.TextIO, pretty: bool) -> None:
+    json.dump(
+        pull_requests,
+        json_file,
+        indent=2 if pretty else None,
+        separators=(",", ": ") if pretty else (",", ":"),
+    )
+    json_file.close()
+
+
 if __name__ == "__main__":
     options = get_options(sys.argv[1:])
     pull_requests = get_merged_pull_requests(**vars(options))
     print(f"analysing {len(pull_requests):,} merged PRs")
-    if options.json:
-        json.dump(
-            pull_requests,
-            options.json,
-            indent=2 if options.pretty else None,
-            separators=(",", ": ") if options.pretty else (",", ":"),
-        )
-    if options.csv:
-        writer = csv.DictWriter(options.csv, fieldnames=list(pull_requests[0].keys()))
-        writer.writeheader()
-        writer.writerows(pull_requests)
+    if options.csv is not None:
+        _write_csv(pull_requests, options.csv)
+    if options.json is not None:
+        _write_json(pull_requests, options.json, options.pretty)
     print(describe(pull_requests))
