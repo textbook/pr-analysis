@@ -9,13 +9,13 @@ from stats import describe
 
 
 def get_options(args: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--created-after", default=None, help="Filter by creation date", type=_valid_date)
-    parser.add_argument("--json", default=None, help="Save PR data to file", type=argparse.FileType("w"))
-    parser.add_argument("--limit", default=None, help="Number of PRs to analyse", type=int)
-    parser.add_argument("--merged-before", default=None, help="Filter by merge date", type=_valid_date)
-    parser.add_argument("--owner", help="Org or user", required=True, type=str)
-    parser.add_argument("--repo", help="Repository", required=True, type=str)
+    parser = argparse.ArgumentParser(description="Perform statistical analysis on merged pull requests")
+    parser.add_argument("owner", help="Org or user", type=str)
+    parser.add_argument("repo", help="Repository", type=str)
+    parser.add_argument("--created-after", help="Filter by creation date", type=_valid_date)
+    parser.add_argument("--json", help="Save PR data to file", type=argparse.FileType("w"))
+    parser.add_argument("--limit", help="Number of PRs to analyse", type=int)
+    parser.add_argument("--merged-before", help="Filter by merge date", type=_valid_date)
     parser.add_argument("--pretty", action="store_true", help="Human-readable JSON")
     return parser.parse_args(args)
 
