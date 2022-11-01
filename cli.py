@@ -16,6 +16,7 @@ def get_options(args: list[str]) -> argparse.Namespace:
     parser.add_argument("--merged-before", default=None, help="Filter by merge date", type=_valid_date)
     parser.add_argument("--owner", help="Org or user", required=True, type=str)
     parser.add_argument("--repo", help="Repository", required=True, type=str)
+    parser.add_argument("--pretty", action="store_true", help="Human-readable JSON")
     return parser.parse_args(args)
 
 
@@ -32,5 +33,10 @@ if __name__ == "__main__":
     pull_requests = get_merged_pull_requests(**vars(options))
     print(f"analysing {len(pull_requests):,} merged PRs")
     if options.json:
-        json.dump(pull_requests, options.json)
+        json.dump(
+            pull_requests,
+            options.json,
+            indent=2 if options.pretty else None,
+            separators=(",", ": ") if options.pretty else (",", ":"),
+        )
     print(describe(pull_requests))
