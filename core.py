@@ -37,6 +37,7 @@ def get_merged_pull_requests(
     merged_before: datetime.datetime | None,
     owner: str,
     repo: str,
+    **_,
 ) -> list[PullRequest]:
     """Get a list of all merged Pull Requests in the specified repo."""
     pull_requests = []
