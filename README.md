@@ -1,6 +1,6 @@
 # Pull Request Analysis
 
-How long does it take to merge PRs?
+How long does it take to merge pull requests?
 
 ## Installation
 
