@@ -12,5 +12,9 @@ class Stats(typing.TypedDict):
 
 
 def describe(pull_requests: list[EnrichedPullRequest]) -> Stats:
-    lives = [pr["open_for"] for pr in pull_requests]
+    lives = [
+        open_for
+        for pr in pull_requests
+        if (open_for := pr.get("open_for")) is not None
+    ]
     return dict(mean=statistics.mean(lives), median=statistics.median(lives), mode=statistics.mode(lives))

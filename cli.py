@@ -6,7 +6,7 @@ import json
 import sys
 import typing
 
-from core import EnrichedPullRequest, get_merged_pull_requests
+from core import EnrichedPullRequest, get_pull_requests
 from stats import describe
 
 
@@ -14,14 +14,19 @@ def get_options(args: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Perform statistical analysis on merged pull requests")
     parser.add_argument("owner", help="Org or user", type=str)
     parser.add_argument("repo", help="Repository", type=str)
+    parser.add_argument("--closed", action="store_true", help="Only include closed PRs")
     parser.add_argument("--created-after", help="Filter by creation date", type=_valid_date)
     parser.add_argument("--csv", help="Save PR data to CSV file", type=argparse.FileType("w"))
     parser.add_argument("--json", help="Save PR data to JSON file", type=argparse.FileType("w"))
     parser.add_argument("--limit", help="Number of PRs to analyse", type=int)
-    parser.add_argument("--merged-before", help="Filter by merge date", type=_valid_date)
+    parser.add_argument("--merged", action="store_true", help="Only include merged PRs")
+    parser.add_argument("--merged-before", help="Filter by merge date (implies --merged)", type=_valid_date)
     parser.add_argument("--pretty", action="store_true", help="Human-readable JSON")
     parser.add_argument("--quiet", action="store_true", help="Suppress printed outputs")
-    return parser.parse_args(args)
+    options = parser.parse_args(args)
+    if options.merged_before is not None:
+        options.merged = True
+    return options
 
 
 def _valid_date(value: str) -> datetime.datetime:
@@ -51,7 +56,7 @@ def _write_json(pull_requests: list[EnrichedPullRequest], json_file: typing.Text
 
 if __name__ == "__main__":
     options = get_options(sys.argv[1:])
-    pull_requests = get_merged_pull_requests(**vars(options))
+    pull_requests = get_pull_requests(**vars(options))
     if not options.quiet:
         print(f"analysing {len(pull_requests):,} merged PRs")
     if options.csv is not None:

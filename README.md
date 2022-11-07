@@ -20,9 +20,9 @@ Run `cli.py` and pass the appropriate arguments:
 
 ```shell
 $ ./cli.py --help
-usage: cli.py [-h] [--created-after CREATED_AFTER] [--csv CSV] [--json JSON]
-              [--limit LIMIT] [--merged-before MERGED_BEFORE] [--pretty]
-              [--quiet]
+usage: cli.py [-h] [--closed] [--created-after CREATED_AFTER] [--csv CSV]
+              [--json JSON] [--limit LIMIT] [--merged]
+              [--merged-before MERGED_BEFORE] [--pretty] [--quiet]
               owner repo
 
 Perform statistical analysis on merged pull requests
@@ -33,13 +33,15 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
+  --closed              Only include closed PRs
   --created-after CREATED_AFTER
                         Filter by creation date
   --csv CSV             Save PR data to CSV file
   --json JSON           Save PR data to JSON file
   --limit LIMIT         Number of PRs to analyse
+  --merged              Only include merged PRs
   --merged-before MERGED_BEFORE
-                        Filter by merge date
+                        Filter by merge date (implies --merged)
   --pretty              Human-readable JSON
   --quiet               Suppress printed outputs
 ```
