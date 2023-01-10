@@ -15,6 +15,7 @@ class PullRequest(typing.TypedDict):
     labels: list[str]
     merged_at: str | None
     number: int
+    title: str
 
 
 def fetch_pull_requests(
@@ -73,6 +74,7 @@ def _query(owner: str, repo: str, states: list[STATE], cursor: str = None) -> st
                             }}
                             mergedAt
                             number
+                            title
                         }}
                     }}
                     pageInfo {{
